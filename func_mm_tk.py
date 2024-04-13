@@ -1,3 +1,4 @@
+import tkinter as tk
 from func_string import split_string
 from func_db import get_database_config, get_data_from_db_by_sqlString
 
@@ -36,12 +37,46 @@ def calculate_similarity(text, products):
     
     return similarity_scores
 
+
+def on_submit():
+    # Get the text entered by the user
+    text = entry.get()
+    
+    # Calculate similarity scores
+    similarity_scores = calculate_similarity(text, products)
+    
+    # Display similarity scores in the result label
+    result_label.config(text=str(similarity_scores))
+
+
 # Example usage:
 config_filename = 'config.json'
 config = get_database_config(config_filename)
 sqlString = "select top 100 ITEM_ID, ITEM_NAME from usv_Ax_InventTable"
 products = get_data_from_db_by_sqlString(config, sqlString)
 
-text = "Name Plate"
-similarity_scores = calculate_similarity(text, products)
-print("Similarity Scores:", similarity_scores)
+# Create a Tkinter window
+window = tk.Tk()
+window.title("Text Similarity Calculator")
+
+# Set the size of the window
+window.geometry("1200x600")
+
+# Create a label for the input text
+input_label = tk.Label(window, text="Enter the text:")
+input_label.pack()
+
+# Create an entry widget for the user to input text
+entry = tk.Entry(window)
+entry.pack()
+
+# Create a button to submit the input
+submit_button = tk.Button(window, text="Submit", command=on_submit)
+submit_button.pack()
+
+# Create a label to display the result
+result_label = tk.Label(window, text="")
+result_label.pack()
+
+# Run the Tkinter event loop
+window.mainloop()
