@@ -60,9 +60,9 @@ class ProductSimilarity(QDialog):
         mainLayout = QGridLayout()
         mainLayout.addLayout(topLayout, 0, 0, 1, 2)
         mainLayout.addWidget(self.topSearchGroupBox, 1, 0, 1, 2)
-        mainLayout.addWidget(self.topLeftGroupBox, 2, 0)
-        mainLayout.addWidget(self.topRightGroupBox, 2, 1)
-        mainLayout.addWidget(self.bottomLeftTabWidget, 3, 0)
+        # mainLayout.addWidget(self.topLeftGroupBox, 2, 0)
+        # mainLayout.addWidget(self.topRightGroupBox, 2, 1)
+        mainLayout.addWidget(self.bottomLeftTabWidget, 3, 0, 1, 2)
         mainLayout.addWidget(self.bottomRightGroupBox, 3, 1)
         mainLayout.addWidget(self.progressBar, 4, 0, 1, 2)
         mainLayout.setRowStretch(1, 1)
@@ -99,6 +99,7 @@ class ProductSimilarity(QDialog):
 
         styleLabelProductName = QLabel("&Product Name:")
         styleLabelProductName.setBuddy(lineEntryProductName)
+        lineEntryProductName.setFixedWidth(250) 
 
         pushButtonSubmit = QPushButton("Compare")
         pushButtonSubmit.setDefault(True)
