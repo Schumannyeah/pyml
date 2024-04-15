@@ -1,19 +1,27 @@
+# Author:         Schumann
+# Date:           20240415
+# Description:    For given one product Description
+#                 System will split it by multiple separators and
+#                 Then compare it with database records (also being split)
+#                 Then return a list shown in a table with higher than a certain similarity %
+
 from PyQt6.QtCore import QDateTime, Qt, QTimer
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDateTimeEdit,
         QDial, QDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
         QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
         QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
-        QVBoxLayout, QWidget)
+        QVBoxLayout, QWidget, QFrame)
 
 
-class WidgetGallery(QDialog):
+class ProductSimilarity(QDialog):
     def __init__(self, parent=None):
-        super(WidgetGallery, self).__init__(parent)
+        super(ProductSimilarity, self).__init__(parent)
 
         self.originalPalette = QApplication.palette()
 
         styleComboBox = QComboBox()
         styleComboBox.addItems(QStyleFactory.keys())
+        styleComboBox.setCurrentText("Fusion")  # Set default selection to "Fusion"
 
         styleLabel = QLabel("&Style:")
         styleLabel.setBuddy(styleComboBox)
@@ -23,6 +31,7 @@ class WidgetGallery(QDialog):
 
         disableWidgetsCheckBox = QCheckBox("&Disable widgets")
 
+        self.createTopSearchGroupBox()
         self.createTopLeftGroupBox()
         self.createTopRightGroupBox()
         self.createBottomLeftTabWidget()
@@ -44,23 +53,25 @@ class WidgetGallery(QDialog):
         topLayout.addStretch(1)
         topLayout.addWidget(self.useStylePaletteCheckBox)
         topLayout.addWidget(disableWidgetsCheckBox)
+        
 
         #  QGridLayout arranges widgets in a grid layout
         # adding another layout (topLayout) to it at row 0, column 0, spanning 1 row and 2 columns.
         mainLayout = QGridLayout()
         mainLayout.addLayout(topLayout, 0, 0, 1, 2)
-        mainLayout.addWidget(self.topLeftGroupBox, 1, 0)
-        mainLayout.addWidget(self.topRightGroupBox, 1, 1)
-        mainLayout.addWidget(self.bottomLeftTabWidget, 2, 0)
-        mainLayout.addWidget(self.bottomRightGroupBox, 2, 1)
-        mainLayout.addWidget(self.progressBar, 3, 0, 1, 2)
+        mainLayout.addWidget(self.topSearchGroupBox, 1, 0, 1, 2)
+        mainLayout.addWidget(self.topLeftGroupBox, 2, 0)
+        mainLayout.addWidget(self.topRightGroupBox, 2, 1)
+        mainLayout.addWidget(self.bottomLeftTabWidget, 3, 0)
+        mainLayout.addWidget(self.bottomRightGroupBox, 3, 1)
+        mainLayout.addWidget(self.progressBar, 4, 0, 1, 2)
         mainLayout.setRowStretch(1, 1)
         mainLayout.setRowStretch(2, 1)
         mainLayout.setColumnStretch(0, 1)
         mainLayout.setColumnStretch(1, 1)
         self.setLayout(mainLayout)
 
-        self.setWindowTitle("Styles")
+        self.setWindowTitle("Product Name Similarity %")
         self.changeStyle('Fusion')
 
     def changeStyle(self, styleName):
@@ -77,6 +88,28 @@ class WidgetGallery(QDialog):
         curVal = self.progressBar.value()
         maxVal = self.progressBar.maximum()
         self.progressBar.setValue(curVal + (maxVal - curVal) // 100)
+
+
+    def createTopSearchGroupBox(self):
+        self.topSearchGroupBox = QGroupBox("Search")
+        layout = QHBoxLayout()
+
+        lineEntryProductName = QLineEdit('Product Name')
+        lineEntryProductName.setEchoMode(QLineEdit.EchoMode.Normal)  # Change echo mode to Normal
+
+        styleLabelProductName = QLabel("&Product Name:")
+        styleLabelProductName.setBuddy(lineEntryProductName)
+
+        pushButtonSubmit = QPushButton("Compare")
+        pushButtonSubmit.setDefault(True)
+
+        layout.addWidget(styleLabelProductName)
+        layout.addWidget(lineEntryProductName)
+        layout.addWidget(pushButtonSubmit)
+        layout.addStretch(1)
+        
+        self.topSearchGroupBox.setLayout(layout)
+
 
     def createTopLeftGroupBox(self):
         self.topLeftGroupBox = QGroupBox("Group 1")
@@ -199,6 +232,6 @@ if __name__ == '__main__':
     import sys
 
     app = QApplication(sys.argv)
-    gallery = WidgetGallery()
+    gallery = ProductSimilarity()
     gallery.show()
     sys.exit(app.exec())

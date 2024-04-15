@@ -82,36 +82,42 @@ class TextSimilarityCalculator(QWidget):
         return similarity_scores
 
     def on_submit(self):
-        # Get the text from the entry widget
-        text = self.entry.text()
+        try:
+            # Get the text from the entry widget
+            text = self.entry.text()
 
-        # Calculate the similarity scores
-        similarity_scores = self.calculate_similarity(text, self.products)
+            # Calculate the similarity scores
+            similarity_scores = self.calculate_similarity(text, self.products)
 
-        # Clear the previous results from the result layout
-        self.clear_result_layout()
+            # Clear the previous results from the result layout
+            self.clear_result_layout()
 
-        # Display the new results in the result layout
-        for score in similarity_scores:
-            # Create QLabel widgets to display the result
-            item_id_label = QLabel(str(score[0]))
-            item_name_label = QLabel(score[1])
-            similarity_percent_label = QLabel("{:.2f}%".format(score[2]))
+            # Define column count
+            column_count = 3
 
-            # Append the labels to a list
-            # labels = [item_id_label, item_name_label, similarity_percent_label]
+            # Initialize row count
+            row = 0
 
-            # Add the labels to the result layout
-            # for label in labels:
-            #     self.result_layout.addWidget(label)
+            # Display the new results in the result layout
+            for score in similarity_scores:
+                # Create QLabel widgets to display the result
+                item_id_label = QLabel(str(score[0]))
+                item_name_label = QLabel(score[1])
+                similarity_percent_label = QLabel("{:.2f}%".format(score[2]))
 
-            # Add the labels to the result layout
-            self.result_layout.addWidget(item_id_label, row, 0 % column_count)
-            self.result_layout.addWidget(item_name_label, row, 1 % column_count)
-            self.result_layout.addWidget(similarity_percent_label, row, 2 % column_count)
+                # Add the labels to the result layout
+                self.result_layout.addWidget(item_id_label, row, 0)
+                self.result_layout.addWidget(item_name_label, row, 1)
+                self.result_layout.addWidget(similarity_percent_label, row, 2)
 
-        # Force the scroll area to update its contents
-        self.result_widget.update()
+                # Increment row count
+                row += 1
+
+            # Force the scroll area to update its contents
+            self.result_widget.update()
+        
+        except Exception as e:
+            print("An exception occurred:", e)
 
 
 
