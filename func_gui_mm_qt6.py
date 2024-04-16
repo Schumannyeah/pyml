@@ -11,6 +11,9 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDateTimeEdit,
         QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
         QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
         QVBoxLayout, QWidget, QFrame)
+from func_db import get_database_config, get_data_from_db_by_sqlString
+from func_string import split_string
+from PyQt6.QtGui import QGuiApplication
 
 
 class ProductSimilarity(QDialog):
@@ -53,22 +56,29 @@ class ProductSimilarity(QDialog):
         topLayout.addStretch(1)
         topLayout.addWidget(self.useStylePaletteCheckBox)
         topLayout.addWidget(disableWidgetsCheckBox)
-        
+
+        # control the initial size
+        margin = 100
+        screen_geometry = QGuiApplication.primaryScreen().geometry()
+        window_width = screen_geometry.width() - 2 * margin
+        window_height = screen_geometry.height() - 2 * margin
+        self.setFixedSize(window_width, window_height)
 
         #  QGridLayout arranges widgets in a grid layout
         # adding another layout (topLayout) to it at row 0, column 0, spanning 1 row and 2 columns.
         mainLayout = QGridLayout()
-        mainLayout.addLayout(topLayout, 0, 0, 1, 2)
-        mainLayout.addWidget(self.topSearchGroupBox, 1, 0, 1, 2)
+        mainLayout.addLayout(topLayout, 0, 0)
+        mainLayout.addWidget(self.topSearchGroupBox, 1, 0)
         # mainLayout.addWidget(self.topLeftGroupBox, 2, 0)
         # mainLayout.addWidget(self.topRightGroupBox, 2, 1)
-        mainLayout.addWidget(self.bottomLeftTabWidget, 3, 0, 1, 2)
-        mainLayout.addWidget(self.bottomRightGroupBox, 3, 1)
-        mainLayout.addWidget(self.progressBar, 4, 0, 1, 2)
+        mainLayout.addWidget(self.bottomLeftTabWidget, 2, 0)
+        # mainLayout.addWidget(self.bottomRightGroupBox, 2, 1)
+        # mainLayout.addWidget(self.progressBar, 3, 0, 1, 2)
         mainLayout.setRowStretch(1, 1)
         mainLayout.setRowStretch(2, 1)
-        mainLayout.setColumnStretch(0, 1)
-        mainLayout.setColumnStretch(1, 1)
+        # mainLayout.setRowStretch(3, 1)  # Stretch row 3
+        # mainLayout.setColumnStretch(0, 1)
+        # mainLayout.setColumnStretch(1, 1)
         self.setLayout(mainLayout)
 
         self.setWindowTitle("Product Name Similarity %")
@@ -89,27 +99,85 @@ class ProductSimilarity(QDialog):
         maxVal = self.progressBar.maximum()
         self.progressBar.setValue(curVal + (maxVal - curVal) // 100)
 
+    def calculate_similarity(self, text, products):
+        input_strings = split_string(text)
+        similarity_scores = []
+
+        for product in products:
+            item_id = product[0]
+            item_name = product[1]
+            product_words = split_string(item_name)
+            total_similarity = 0
+
+            for string in input_strings:
+                if string in product_words:
+                    total_similarity += 1 / len(input_strings)
+
+            similarity_percent = total_similarity * 100
+            similarity_scores.append([item_id, item_name, similarity_percent])
+
+        return similarity_scores
+
+    def handleCompareButtonClick(self):
+        # Call the function to query the database
+        try:
+            # Retrieve the product name from the QLineEdit
+            product_name = self.lineEntryProductName.text()
+
+            # Calculate the similarity scores
+            similarity_scores = self.calculate_similarity(product_name, self.products)
+
+            # Clear the previous results from the result layout
+            self.clear_result_layout()
+
+            # Define column count
+            column_count = 3
+
+            # Initialize row count
+            row = 0
+
+            # Display the new results in the result layout
+            for score in similarity_scores:
+                # Create QLabel widgets to display the result
+                item_id_label = QLabel(str(score[0]))
+                item_name_label = QLabel(score[1])
+                similarity_percent_label = QLabel("{:.2f}%".format(score[2]))
+
+                print(item_id_label)
+                print(item_name_label)
+                print(similarity_percent_label)
+
+                # Increment row count
+                row += 1
+
+            # Force the scroll area to update its contents
+            self.result_widget.update()
+        
+        except Exception as e:
+            print("An exception occurred:", e)
 
     def createTopSearchGroupBox(self):
         self.topSearchGroupBox = QGroupBox("Search")
         layout = QHBoxLayout()
 
-        lineEntryProductName = QLineEdit('Product Name')
-        lineEntryProductName.setEchoMode(QLineEdit.EchoMode.Normal)  # Change echo mode to Normal
+        self.lineEntryProductName = QLineEdit('')
+        self.lineEntryProductName.setEchoMode(QLineEdit.EchoMode.Normal)  # Change echo mode to Normal
 
         styleLabelProductName = QLabel("&Product Name:")
-        styleLabelProductName.setBuddy(lineEntryProductName)
-        lineEntryProductName.setFixedWidth(250) 
+        styleLabelProductName.setBuddy(self.lineEntryProductName)
+        self.lineEntryProductName.setFixedWidth(350) 
 
         pushButtonSubmit = QPushButton("Compare")
         pushButtonSubmit.setDefault(True)
+        pushButtonSubmit.clicked.connect(self.handleCompareButtonClick)
 
         layout.addWidget(styleLabelProductName)
-        layout.addWidget(lineEntryProductName)
+        layout.addWidget(self.lineEntryProductName)
         layout.addWidget(pushButtonSubmit)
         layout.addStretch(1)
         
         self.topSearchGroupBox.setLayout(layout)
+        self.topSearchGroupBox.setFixedHeight(80)
 
 
     def createTopLeftGroupBox(self):
@@ -181,8 +249,8 @@ class ProductSimilarity(QDialog):
         tab2hbox.addWidget(textEdit)
         tab2.setLayout(tab2hbox)
 
-        self.bottomLeftTabWidget.addTab(tab1, "&Table")
-        self.bottomLeftTabWidget.addTab(tab2, "Text &Edit")
+        self.bottomLeftTabWidget.addTab(tab1, "&Comparison Results")
+        self.bottomLeftTabWidget.addTab(tab2, "&Explanations")
 
     def createBottomRightGroupBox(self):
         self.bottomRightGroupBox = QGroupBox("Group 3")
