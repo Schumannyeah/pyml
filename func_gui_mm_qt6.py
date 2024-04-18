@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDateTimeEdit,
         QDial, QDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
         QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
         QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
-        QVBoxLayout, QWidget, QFrame)
+        QVBoxLayout, QWidget, QFrame, QTableWidgetItem)
 from func_db import get_database_config, get_data_from_db_by_sqlString
 from func_string import split_string
 from PyQt6.QtGui import QGuiApplication
@@ -19,6 +19,9 @@ from PyQt6.QtGui import QGuiApplication
 class ProductSimilarity(QDialog):
     def __init__(self, parent=None):
         super(ProductSimilarity, self).__init__(parent)
+        self.products = None  # Initialize products attribute
+        #  Create the table widget
+        self.tableWidget = QTableWidget()
 
         self.originalPalette = QApplication.palette()
 
@@ -84,6 +87,9 @@ class ProductSimilarity(QDialog):
         self.setWindowTitle("Product Name Similarity %")
         self.changeStyle('Fusion')
 
+        # Set focus to lineEntryProductName
+        self.lineEntryProductName.setFocus()
+
     def changeStyle(self, styleName):
         QApplication.setStyle(QStyleFactory.create(styleName))
         self.changePalette()
@@ -120,41 +126,66 @@ class ProductSimilarity(QDialog):
 
     def handleCompareButtonClick(self):
         # Call the function to query the database
-        try:
-            # Retrieve the product name from the QLineEdit
-            product_name = self.lineEntryProductName.text()
+        # try:
 
-            # Calculate the similarity scores
-            similarity_scores = self.calculate_similarity(product_name, self.products)
+        # Retrieve the product name from the QLineEdit
+        product_name = self.lineEntryProductName.text()
 
-            # Clear the previous results from the result layout
-            self.clear_result_layout()
+        # Fetch the products from the database only if it hasn't been fetched before
+        if self.products is None:
+            # Retrieve the products from the database
+            config_filename = 'config.json'
+            config = get_database_config(config_filename)
+            sqlString = "select top 100 ITEM_ID, ITEM_NAME from usv_Ax_InventTable"
+            self.products = get_data_from_db_by_sqlString(config, sqlString)
 
-            # Define column count
-            column_count = 3
+            # Get the number of columns returned from the database
+            num_columns = len(self.products[0]) if self.products else 0
 
-            # Initialize row count
-            row = 0
+            # Get the table widget from the "Comparison Results" tab
+            tableWidget = self.bottomLeftTabWidget.findChild(QTableWidget)
 
-            # Display the new results in the result layout
-            for score in similarity_scores:
-                # Create QLabel widgets to display the result
-                item_id_label = QLabel(str(score[0]))
-                item_name_label = QLabel(score[1])
-                similarity_percent_label = QLabel("{:.2f}%".format(score[2]))
+            # Update the number of columns in the tableWidget
+            tableWidget.setColumnCount(num_columns + 1)
 
-                print(item_id_label)
-                print(item_name_label)
-                print(similarity_percent_label)
+        # Calculate the similarity scores
+        similarity_scores = self.calculate_similarity(product_name, self.products)
 
-                # Increment row count
-                row += 1
+        # Clear the existing table contents
+        self.clear_table()
 
-            # Force the scroll area to update its contents
-            self.result_widget.update()
-        
-        except Exception as e:
-            print("An exception occurred:", e)
+        # Get the table widget from the "Comparison Results" tab
+        tableWidget = self.bottomLeftTabWidget.findChild(QTableWidget)
+
+        # Populate the table with similarity scores
+        self.populate_table(similarity_scores, tableWidget)
+
+        # except Exception as e:
+        #     print("An exception occurred:", e)
+
+    def clear_table(self):
+        self.tableWidget.clearContents()
+
+    def populate_table(self, similarity_scores, tableWidget):
+        # Set column labels
+        tableWidget.setHorizontalHeaderLabels(["ITEM ID", "ITEM NAME", "SIMILARITY"])
+
+        # Set row count
+        tableWidget.setRowCount(len(similarity_scores))
+
+        # Populate table with similarity scores
+        for row, score in enumerate(similarity_scores):
+            item_id, item_name, similarity_percent = score
+
+            # Create QTableWidgetItem objects for each cell
+            item_id_item = QTableWidgetItem(str(item_id))
+            item_name_item = QTableWidgetItem(item_name)
+            similarity_percent_item = QTableWidgetItem("{:.2f}%".format(similarity_percent))
+
+            # Set QTableWidgetItem objects to their respective cells
+            tableWidget.setItem(row, 0, item_id_item)
+            tableWidget.setItem(row, 1, item_name_item)
+            tableWidget.setItem(row, 2, similarity_percent_item)
 
     def createTopSearchGroupBox(self):
         self.topSearchGroupBox = QGroupBox("Search")
@@ -170,6 +201,9 @@ class ProductSimilarity(QDialog):
         pushButtonSubmit = QPushButton("Compare")
         pushButtonSubmit.setDefault(True)
         pushButtonSubmit.clicked.connect(self.handleCompareButtonClick)
+
+        # Connect returnPressed signal to handleCompareButtonClick method
+        self.lineEntryProductName.returnPressed.connect(self.handleCompareButtonClick)
 
         layout.addWidget(styleLabelProductName)
         layout.addWidget(self.lineEntryProductName)
@@ -227,7 +261,9 @@ class ProductSimilarity(QDialog):
                 QSizePolicy.Policy.Ignored)
 
         tab1 = QWidget()
-        tableWidget = QTableWidget(2, 10)
+        # Get the number of columns returned from the database
+        num_columns = len(self.products[0]) if self.products else 0
+        tableWidget = QTableWidget(2, num_columns)
 
         tab1hbox = QHBoxLayout()
         tab1hbox.setContentsMargins(5, 5, 5, 5)
