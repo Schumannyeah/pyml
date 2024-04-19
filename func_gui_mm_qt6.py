@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDateTimeEdit,
         QDial, QDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
         QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
         QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
-        QVBoxLayout, QWidget, QFrame, QTableWidgetItem)
+        QVBoxLayout, QWidget, QFrame, QTableWidgetItem, QMessageBox)
 from func_db import get_database_config, get_data_from_db_by_sqlString
 from func_string import split_string
 from PyQt6.QtGui import QGuiApplication
@@ -134,6 +134,11 @@ class ProductSimilarity(QDialog):
         # Call the function to query the database
         # try:
 
+        # Check if lineEntryProductName is empty
+        if self.lineEntryProductName.text().strip() == "":
+            QMessageBox.warning(self, "Empty Input", "You have NOT input anything to search!")
+            return
+        
         # Retrieve the product name from the QLineEdit
         product_name = self.lineEntryProductName.text()
         percentage = int(self.lineEditPercentage.text())

@@ -1,11 +1,24 @@
 import pyodbc
 import json
+import sys
+import os
 
 
 def get_database_config(filename):
-    with open(filename, 'r') as file:
+    # Use sys._MEIPASS if available (running as bundled executable)
+    # if hasattr(sys, '_MEIPASS'):
+    #     filepath = os.path.join(sys._MEIPASS, filename)
+    # else:
+    #     filepath = filename
+
+    filepath = '/path/to/config.json'  # Replace with the actual path
+    with open(filepath, 'r') as file:
         config = json.load(file)
     return config
+
+    # with open(filename, 'r') as file:
+    #     config = json.load(file)
+    # return config
 
 
 def get_data_from_db_by_sqlString(config, sqlString):
@@ -14,6 +27,10 @@ def get_data_from_db_by_sqlString(config, sqlString):
     database = config['database']
     username = config['username']
     password = config['password']
+    # server = "MESCHZHE01"
+    # database = "ofbiz"
+    # username = "pbilogin"
+    # password = "kmcj123456"
 
     # Establish a connection to the MSSQL database
     connection = pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
