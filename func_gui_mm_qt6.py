@@ -105,14 +105,16 @@ class ProductSimilarity(QDialog):
         maxVal = self.progressBar.maximum()
         self.progressBar.setValue(curVal + (maxVal - curVal) // 100)
 
-    def calculate_similarity(self, text, products):
-        input_strings = split_string(text)
+    def calculate_similarity(self, text, products, percentage):
+        input_strings = split_string(text.lower())
         similarity_scores = []
 
         for product in products:
             item_id = product[0]
-            item_name = product[1]
-            product_words = split_string(item_name)
+            item_name_origin = product[1]
+            item_name_lower = product[1].lower()
+            item_group_id = product[2]
+            product_words = split_string(item_name_lower)
             total_similarity = 0
 
             for string in input_strings:
@@ -120,7 +122,11 @@ class ProductSimilarity(QDialog):
                     total_similarity += 1 / len(input_strings)
 
             similarity_percent = total_similarity * 100
-            similarity_scores.append([item_id, item_name, similarity_percent])
+            if similarity_percent >= percentage:
+                similarity_scores.append([item_id, item_name_origin, item_group_id, similarity_percent])
+
+            # Sort similarity_scores in descending order based on the similarity percentage
+            similarity_scores.sort(key=lambda x: x[3], reverse=True)
 
         return similarity_scores
 
@@ -130,13 +136,14 @@ class ProductSimilarity(QDialog):
 
         # Retrieve the product name from the QLineEdit
         product_name = self.lineEntryProductName.text()
+        percentage = int(self.lineEditPercentage.text())
 
         # Fetch the products from the database only if it hasn't been fetched before
         if self.products is None:
             # Retrieve the products from the database
             config_filename = 'config.json'
             config = get_database_config(config_filename)
-            sqlString = "select top 100 ITEM_ID, ITEM_NAME from usv_Ax_InventTable"
+            sqlString = "select ITEM_ID, ITEM_NAME, ITEM_GROUP_ID from usv_Ax_InventTable"
             self.products = get_data_from_db_by_sqlString(config, sqlString)
 
             # Get the number of columns returned from the database
@@ -148,8 +155,14 @@ class ProductSimilarity(QDialog):
             # Update the number of columns in the tableWidget
             tableWidget.setColumnCount(num_columns + 1)
 
+         # Set tab1 in focus
+        self.bottomLeftTabWidget.setCurrentIndex(0)
+
         # Calculate the similarity scores
-        similarity_scores = self.calculate_similarity(product_name, self.products)
+        similarity_scores = self.calculate_similarity(product_name, self.products, percentage)
+
+        # Update the hit count QLineEdit
+        self.lineEditHitCount.setText(str(len(similarity_scores)))
 
         # Clear the existing table contents
         self.clear_table()
@@ -168,24 +181,29 @@ class ProductSimilarity(QDialog):
 
     def populate_table(self, similarity_scores, tableWidget):
         # Set column labels
-        tableWidget.setHorizontalHeaderLabels(["ITEM ID", "ITEM NAME", "SIMILARITY"])
+        tableWidget.setHorizontalHeaderLabels(["ITEM ID", "ITEM NAME", "ITEM GROUP ID", "SIMILARITY"])
 
         # Set row count
         tableWidget.setRowCount(len(similarity_scores))
 
         # Populate table with similarity scores
         for row, score in enumerate(similarity_scores):
-            item_id, item_name, similarity_percent = score
+            item_id, item_name, item_group_id, similarity_percent = score
 
             # Create QTableWidgetItem objects for each cell
             item_id_item = QTableWidgetItem(str(item_id))
             item_name_item = QTableWidgetItem(item_name)
+            item_group_id_item = QTableWidgetItem(item_group_id)
             similarity_percent_item = QTableWidgetItem("{:.2f}%".format(similarity_percent))
 
             # Set QTableWidgetItem objects to their respective cells
             tableWidget.setItem(row, 0, item_id_item)
             tableWidget.setItem(row, 1, item_name_item)
-            tableWidget.setItem(row, 2, similarity_percent_item)
+            tableWidget.setItem(row, 2, item_group_id_item)
+            tableWidget.setItem(row, 3, similarity_percent_item)
+
+        # Adjust column widths to contents
+        tableWidget.resizeColumnsToContents()
 
     def createTopSearchGroupBox(self):
         self.topSearchGroupBox = QGroupBox("Search")
@@ -198,6 +216,16 @@ class ProductSimilarity(QDialog):
         styleLabelProductName.setBuddy(self.lineEntryProductName)
         self.lineEntryProductName.setFixedWidth(350) 
 
+        self.lineEditPercentage = QLineEdit('50')  # Default value is 50
+        self.lineEditPercentage.setFixedWidth(50)  # Adjust width as needed
+
+        labelResultOver = QLabel("% Over:")
+        labelResultOver.setBuddy(self.lineEditPercentage)
+
+        labelHitCount = QLabel("Hit #:")
+        self.lineEditHitCount = QLineEdit()
+        self.lineEditHitCount.setReadOnly(True)  # Make it read-only
+
         pushButtonSubmit = QPushButton("Compare")
         pushButtonSubmit.setDefault(True)
         pushButtonSubmit.clicked.connect(self.handleCompareButtonClick)
@@ -207,6 +235,10 @@ class ProductSimilarity(QDialog):
 
         layout.addWidget(styleLabelProductName)
         layout.addWidget(self.lineEntryProductName)
+        layout.addWidget(labelResultOver)
+        layout.addWidget(self.lineEditPercentage)
+        layout.addWidget(labelHitCount)
+        layout.addWidget(self.lineEditHitCount)
         layout.addWidget(pushButtonSubmit)
         layout.addStretch(1)
         
@@ -273,12 +305,10 @@ class ProductSimilarity(QDialog):
         tab2 = QWidget()
         textEdit = QTextEdit()
 
-        textEdit.setPlainText("Twinkle, twinkle, little star,\n"
-                              "How I wonder what you are.\n" 
-                              "Up above the world so high,\n"
-                              "Like a diamond in the sky.\n"
-                              "Twinkle, twinkle, little star,\n" 
-                              "How I wonder what you are!\n")
+        textEdit.setPlainText("1. Input the targeted product name and then set the figure of % Over, which defines the matching % between the given text and all the AX Items Description. \n"
+                              "    Both the given text and the AX Items Description are broken down into each single word by using ',', '/', '\\', '-', ' '. (the separators could be extended)\n" 
+                              "    Then the similarity % would be calculated.\n"
+                              "2. If there is any further question and requested function, please contact Schumann.\n")
 
         tab2hbox = QHBoxLayout()
         tab2hbox.setContentsMargins(5, 5, 5, 5)
@@ -286,7 +316,10 @@ class ProductSimilarity(QDialog):
         tab2.setLayout(tab2hbox)
 
         self.bottomLeftTabWidget.addTab(tab1, "&Comparison Results")
-        self.bottomLeftTabWidget.addTab(tab2, "&Explanations")
+        self.bottomLeftTabWidget.addTab(tab2, "&User Instructions")
+
+        # Set tab2 in focus
+        self.bottomLeftTabWidget.setCurrentIndex(1)
 
     def createBottomRightGroupBox(self):
         self.bottomRightGroupBox = QGroupBox("Group 3")
