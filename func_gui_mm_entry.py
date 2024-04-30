@@ -7,6 +7,8 @@ from PyQt6.QtWidgets import QMainWindow, QApplication
 from PyQt6.QtGui import QIcon, QAction, QGuiApplication
 from func_gui_mm_qt6 import ProductSimilarity
 from func_gui_mm_ism import ProductSimilarityMulti
+from func_gui_mm_ism_long_desc import ProductSimilarityMultiLongDesc
+
 
 
 # 使用QMainWindow创建状态栏。
@@ -38,6 +40,11 @@ class MesMate(QMainWindow):
         itemSimMultiAct.setStatusTip('Run Item Similarity - Multiple')
         itemSimMultiAct.triggered.connect(self.show_product_similarity_multiple)
 
+        itemSimMultiLongDescAct = QAction(QIcon('icon\drive_magnify.png'), '&Long Description Similarity - Multiple', self)
+        itemSimMultiLongDescAct.setShortcut('Ctrl+Shift+L')
+        itemSimMultiLongDescAct.setStatusTip('Run Long Description Similarity - Multiple')
+        itemSimMultiLongDescAct.triggered.connect(self.show_product_similarity_multiple_long_desc)
+
         self.statusBar().showMessage('Ready')
         # menuBar方法创建了一个菜单栏，然后使用addMenu创建一个文件菜单，使用addAction创建一个行为。
         menubar = self.menuBar()
@@ -47,6 +54,7 @@ class MesMate(QMainWindow):
         funcMenu = menubar.addMenu('&Fuctions')
         funcMenu.addAction(itemSimSingleAct)
         funcMenu.addAction(itemSimMultiAct)
+        funcMenu.addAction(itemSimMultiLongDescAct)
 
         margin = 100
         screen_geometry = QGuiApplication.primaryScreen().geometry()
@@ -71,6 +79,10 @@ class MesMate(QMainWindow):
 
     def show_product_similarity_multiple(self):
         dialog = ProductSimilarityMulti(self)
+        dialog.exec()
+
+    def show_product_similarity_multiple_long_desc(self):
+        dialog = ProductSimilarityMultiLongDesc(self)
         dialog.exec()
 
 
