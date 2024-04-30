@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f63c67db-4bd1-451b-9d14-517572da35d2" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func_db.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func_gui_mm_entry.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func_gui_mm_entry.spec" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func_gui_mm_entry_ui.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func_gui_mm_ism.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func_gui_mm_qt6.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func_gui_mm_qt6.spec" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func_mm_qt.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/func_string.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gui_demo_common.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gui_demo_db.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gui_demo_db_init.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mm_entry.ui" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projects.db" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Schumannyeah&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Schumannyeah/pyml&quot;,
+    &quot;accountId&quot;: &quot;eb36966c-0b27-4ead-9d2d-6ba9a4dce3ff&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="2faJrVgV9em59dvHZGzicUF5OFX" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.func_gui_mm_entry.executor": "Run",
+    "Python.func_gui_mm_ism.executor": "Run",
+    "Python.func_gui_mm_qt6.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Web/pyml/pyml",
+    "settings.editor.selected.configurable": "terminal"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Web\pyml\pyml" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-0509580d9d50-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.14494.241" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f63c67db-4bd1-451b-9d14-517572da35d2" name="Changes" comment="" />
+      <created>1714033454676</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1714033454676</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
