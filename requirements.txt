@@ -1,2 +1,7 @@
 PyQt6
 requests
+pyodbc
+pandas
+opencv-python
+opencv-python-headless
+face_recognition
