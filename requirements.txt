@@ -7,3 +7,11 @@ opencv-python-headless
 face_recognition
 matplotlib
 seaborn
+PyMuPDF
+PyPDF2
+pdfplumber
+tabula-py
+camelot-py
+pytesseract
+pdf2image
+pillow
