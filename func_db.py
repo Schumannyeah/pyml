@@ -42,14 +42,40 @@ def get_data_from_db_by_sqlString(config, sqlString):
     cursor.execute(sqlString)
 
     # Fetch all rows from the result set
-    products = cursor.fetchall()
+    result_set = cursor.fetchall()
 
     # Close the cursor and connection
     cursor.close()
     connection.close()
 
-    return products
+    return result_set
 
+
+# Function to execute MSSQL stored procedure and return result set
+def execute_stored_procedure(config, proc_name):
+    # Replace with your MSSQL connection details
+    server = config['server']
+    database = config['database']
+    username = config['username']
+    password = config['password']
+
+    # Establish connection
+    conn = pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+password)
+
+    # Create cursor object
+    cursor = conn.cursor()
+
+    # Execute stored procedure
+    cursor.execute(f"EXEC {proc_name}")
+
+    # Fetch all rows from cursor
+    result_set = cursor.fetchall()
+
+    # Close cursor and connection
+    cursor.close()
+    conn.close()
+
+    return result_set
 
 # Example usage:
 # config_filename = 'config.json'

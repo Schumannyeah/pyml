@@ -290,6 +290,7 @@ class ProductSimilarityMulti(QDialog):
         pushButtonExport = QPushButton("Export to Excel")
         pushButtonExport.clicked.connect(self.export_to_excel)
         layout.addWidget(pushButtonExport)
+        # layout.addStretch(1), you create an elastic space in the layout.
         layout.addStretch(1)
         
         self.topSearchGroupBox.setLayout(layout)

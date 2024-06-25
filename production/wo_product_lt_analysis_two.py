@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from IPython.display import display
+from tabulate import tabulate
 
 # Path of the file to read
 data_filepath = "../dataset/wo_commit_comparison.csv"
@@ -13,6 +15,7 @@ filtered_data = data[data['WO_END_YM'] == '2024-06']
 
 # Group by PROD_POOL_ID and calculate counts of NUMERATOR_ACTUAL
 grouped_data = filtered_data.groupby('PROD_POOL_ID')['NUMERATOR_ACTUAL'].value_counts().unstack(fill_value=0)
+print(tabulate(grouped_data, headers='keys', tablefmt='psql'))  # Display in 'psql' format
 
 # # option 1
 # # Plotting
