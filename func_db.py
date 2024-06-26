@@ -71,11 +71,22 @@ def execute_stored_procedure(config, proc_name):
     # Fetch all rows from cursor
     result_set = cursor.fetchall()
 
+    # Get column names from cursor description
+    columns = [column[0] for column in cursor.description]
+
     # Close cursor and connection
     cursor.close()
     conn.close()
 
-    return result_set
+    # Convert rows to list of dictionaries with column names
+    data = []
+    for row in result_set:
+        # Conversion to Dictionary: each row fetched is converted to a dictionary.
+        # where zip(columns, row) pairs each column name
+        # with its corresponding value in the row tuple.
+        data.append(dict(zip(columns, row)))
+
+    return data
 
 # Example usage:
 # config_filename = 'config.json'

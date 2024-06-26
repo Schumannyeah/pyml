@@ -43,48 +43,39 @@ class DataTableDialog(QDialog):
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.ActionsContextMenu)
 
         exportAction = QAction('Export as Excel', self)
-        exportAction.triggered.connect(self.exportAsExcel)
+        exportAction.triggered.connect(self.export_to_excel)
 
         self.addAction(exportAction)
 
-    def exportAsExcel(self):
-        options = QFileDialog.Options()
-        file_name, _ = QFileDialog.getSaveFileName(self, "Save Data as Excel", "",
-                                                   "Excel Files (*.xlsx);;All Files (*)", options=options)
-        if file_name:
-            try:
-                # Retrieve data from tableWidget
-                num_rows = self.tableWidget.rowCount()
-                num_cols = self.tableWidget.columnCount()
+    def export_to_excel(self):
+        # Create a DataFrame to store the table data
+        data = []
+        column_labels = []
+        for col in range(self.tableWidget.columnCount()):
+            column_labels.append(self.tableWidget.horizontalHeaderItem(col).text())
+        for row in range(self.tableWidget.rowCount()):
+            row_data = []
+            for col in range(self.tableWidget.columnCount()):
+                item = self.tableWidget.item(row, col)
+                if item is not None:
+                    row_data.append(item.text())
+                else:
+                    row_data.append('')
+            data.append(row_data)
 
-                data = []
-                for row in range(num_rows):
-                    row_data = []
-                    for col in range(num_cols):
-                        item = self.tableWidget.item(row, col)
-                        if item is not None:
-                            row_data.append(item.text())
-                        else:
-                            row_data.append("")
-                    data.append(row_data)
+        df = pd.DataFrame(data, columns=column_labels)
 
-                # Convert data to DataFrame
-                df = pd.DataFrame(data, columns=[self.tableWidget.horizontalHeaderItem(col).text() for col in
-                                                 range(num_cols)])
+        # Get the file path to save the Excel file
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save Excel file", "", "Excel Files (*.xlsx)")
 
-                # Save DataFrame to Excel
-                df.to_excel(file_name, index=False)
+        if file_path:
+            # Export the DataFrame to Excel
+            df.to_excel(file_path, index=False)
 
-                QMessageBox.information(self, 'Export Successful', 'Data exported successfully.')
-            except Exception as e:
-                QMessageBox.warning(self, 'Error', f'Failed to export data: {str(e)}')
-        else:
-            # Workaround to keep context menu open after canceling the file dialog
-            self.showContextMenu()
 
     def showContextMenu(self):
         menu = QMenu(self)
         exportAction = QAction('Export as Excel', self)
-        exportAction.triggered.connect(self.exportAsExcel)
+        exportAction.triggered.connect(self.export_to_excel)
         menu.addAction(exportAction)
         menu.exec(self.mapToGlobal(self.tableWidget.viewport().rect().center()))

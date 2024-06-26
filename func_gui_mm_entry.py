@@ -124,7 +124,7 @@ class MesMate(QMainWindow):
         self.centerTabWidget = QTabWidget()
         self.centerTabWidget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Ignored)
 
-        tabs = ["Planning", "Logistics", "Warehouse", "Procurement", "ME", "Production"]
+        tabs = ["Planning", "Logistics", "Warehouse", "Procurement", "ME", "Production", "Project"]
 
         for tab_name in tabs:
             tab = QWidget()

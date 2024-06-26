@@ -17,8 +17,8 @@ from func_gui_mm_ism_long_desc import ProductSimilarityMultiLongDesc
 from func_db import get_database_config, execute_stored_procedure, get_data_from_db_by_sqlString
 
 import pandas as pd
-import matplotlib.pyplot as plt
-from chart_plotter.combo_chart_by_sql_fields import plot_pool_chart
+import json
+from chart_plotter.combo_chart_by_sql_fields import plot_combo_chart
 from data_table_builder.DataTableDialog import DataTableDialog
 from datetime import date
 from pandas.api.types import is_string_dtype
@@ -63,6 +63,12 @@ class MesMate(QMainWindow):
         config_filename = 'config.json'
         self.config = get_database_config(config_filename)
 
+        # Load the JSON data from the config file
+        with open('config.json', 'r') as file:
+            config_data = json.load(file)
+
+        # Retrieve the value of "main_screen_margin"
+        main_screen_margin = config_data.get('main_screen_margin')
 
         # set functional visual area
         self.createCenterTabWidget()
@@ -75,9 +81,6 @@ class MesMate(QMainWindow):
         centralWidget.setLayout(mainLayout)
         self.setCentralWidget(centralWidget)
 
-
-
-
         self.statusBar().showMessage('Ready')
         # menuBar方法创建了一个菜单栏，然后使用addMenu创建一个文件菜单，使用addAction创建一个行为。
         menubar = self.menuBar()
@@ -89,22 +92,16 @@ class MesMate(QMainWindow):
         funcMenu.addAction(itemSimMultiAct)
         funcMenu.addAction(itemSimMultiLongDescAct)
 
-        margin = 100
+        margin = main_screen_margin
         screen_geometry = QGuiApplication.primaryScreen().geometry()
         window_width = screen_geometry.width() - 2 * margin
         window_height = screen_geometry.height() - 2 * margin
 
-        self.setGeometry(100, 100, window_width, window_height)
+        self.setGeometry(main_screen_margin, main_screen_margin, window_width, window_height)
         app_icon = QIcon('icon/sport_basketball.png')  # Replace 'icon/app_icon.png' with the path to your icon file
         self.setWindowIcon(app_icon)  # Set the icon using QIcon object
         self.setWindowTitle('MM - Your MES Digital Mate')
         self.show()
-
-
-
-    # def open_product_similarity(self):
-    #     self.product_similarity_dialog.show()
-    #     # Optionally, adjust the position of the dialog within the main window (e.g., using move())
 
     def show_product_similarity_single(self):
         dialog = ProductSimilarity(self)
@@ -118,63 +115,98 @@ class MesMate(QMainWindow):
         dialog = ProductSimilarityMultiLongDesc(self)
         dialog.exec()
 
-
-
     def createCenterTabWidget(self):
         self.centerTabWidget = QTabWidget()
         self.centerTabWidget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Ignored)
 
-        tabs = ["Planning", "Logistics", "Warehouse", "Procurement", "ME", "Production"]
+        tabs = ["Planning", "Logistics", "Warehouse", "Procurement", "ME", "Production", "Project"]
 
         for tab_name in tabs:
             tab = QWidget()
-            tab_layout = QVBoxLayout()
+            tab_layout_production = QVBoxLayout()
 
             if tab_name == "Production":
-                top_row_layout = QHBoxLayout()
-                top_row_layout.addWidget(QLabel("Function 1 --->   "))
-                top_row_layout.addWidget(QLabel("Pool"))
+                top_row_layout_production = QHBoxLayout()
+                top_row_layout_production.addWidget(QLabel("Function 1 --->   "))
+                top_row_layout_production.addWidget(QLabel("Pool"))
                 # Create QComboBox and populate it with data from stored procedure
-                self.combo_box = QComboBox()
-                # Add the "ALL_POOLS" option
-                self.combo_box.addItem("1001 - All Production Pools")
+                self.combo_box_pool = QComboBox()
+                self.combo_box_pool.addItem("1001 - All Production Pools")
 
                 pool_results = get_data_from_db_by_sqlString(self.config, "SELECT POOL_ID + ' - ' + POOL_NAME AS POOL_ID FROM UST_PROD_POOL")  # Call the stored procedure
                 for row in pool_results:
-                    self.combo_box.addItem(row.POOL_ID)  # Assuming the column name is 'pool_id'
+                    self.combo_box_pool.addItem(row.POOL_ID)  # Assuming the column name is 'pool_id'
 
-                top_row_layout.addWidget(self.combo_box)
+                top_row_layout_production.addWidget(self.combo_box_pool)
 
-                start_label = QLabel("Start")
+                label_start = QLabel("Start")
                 self.start_datetime_edit = QDateTimeEdit()
                 start_date = QDate.currentDate().addYears(-1)
                 self.start_datetime_edit.setDate(start_date)
                 self.start_datetime_edit.setDisplayFormat("yyyy-MM-dd")
-                top_row_layout.addWidget(start_label)
-                top_row_layout.addWidget(self.start_datetime_edit)
+                top_row_layout_production.addWidget(label_start)
+                top_row_layout_production.addWidget(self.start_datetime_edit)
 
-                end_label = QLabel("End")
+                label_end = QLabel("End")
                 self.end_datetime_edit = QDateTimeEdit()
                 self.end_datetime_edit.setDate(QDate.currentDate())
                 self.end_datetime_edit.setDisplayFormat("yyyy-MM-dd")
-                top_row_layout.addWidget(end_label)
-                top_row_layout.addWidget(self.end_datetime_edit)
+                top_row_layout_production.addWidget(label_end)
+                top_row_layout_production.addWidget(self.end_datetime_edit)
 
-                self.commit_button = QPushButton("WO Commit % By Pool")
-                self.commit_button.clicked.connect(self.on_commit_button_clicked)
-                top_row_layout.addWidget(self.commit_button)
+                self.button_wo_commit = QPushButton("WO Commit % By Pool")
+                self.button_wo_commit.clicked.connect(self.on_wo_commit_button_clicked)
+                top_row_layout_production.addWidget(self.button_wo_commit)
 
-                top_row_layout.addStretch(1)
-                tab_layout.addLayout(top_row_layout)
+                top_row_layout_production.addStretch(1)
+                tab_layout_production.addLayout(top_row_layout_production)
 
-            tab_layout.addStretch()
-            tab.setLayout(tab_layout)
+
+
+
+
+
+
+
+                sec_row_layout_production = QHBoxLayout()
+                sec_row_layout_production.addWidget(QLabel("Function 2 --->   "))
+                sec_row_layout_production.addWidget(QLabel("Product Category"))
+                # Create QComboBox and populate it with data from stored procedure
+                self.combo_box_prod_cat = QComboBox()
+                self.combo_box_prod_cat.addItem("AX_All")
+                self.combo_box_prod_cat.addItem("AX_NA")
+
+                prod_cat_results = get_data_from_db_by_sqlString(self.config,
+                                                             "select PRODUCT_CATEGORY_ID from PRODUCT_CATEGORY where product_category_id like 'AX_%'")
+                for row in prod_cat_results:
+                    self.combo_box_prod_cat.addItem(row.PRODUCT_CATEGORY_ID)  # Assuming the column name is 'pool_id'
+
+                sec_row_layout_production.addWidget(self.combo_box_prod_cat)
+
+                label_past_days = QLabel("Past Days")
+                self.lineEntryPastDays = QLineEdit('')
+                self.lineEntryPastDays.setEchoMode(QLineEdit.EchoMode.Normal)
+                self.lineEntryPastDays.setFixedWidth(100)
+                sec_row_layout_production.addWidget(label_past_days)
+                sec_row_layout_production.addWidget(self.lineEntryPastDays)
+
+                self.button_product_lt_vs_actual = QPushButton("Product LT Vs Actual By Cateogry")
+                self.button_product_lt_vs_actual.clicked.connect(self.on_product_lt_vs_actual_button_clicked)
+                sec_row_layout_production.addWidget(self.button_product_lt_vs_actual)
+
+                sec_row_layout_production.addStretch(1)
+                tab_layout_production.addLayout(sec_row_layout_production)
+
+
+            # this forces elements to align from left
+            tab_layout_production.addStretch()
+            tab.setLayout(tab_layout_production)
             self.centerTabWidget.addTab(tab, f"&{tab_name}")
 
         self.centerTabWidget.setCurrentIndex(5)
 
-    def on_commit_button_clicked(self):
-        selected_pool = self.combo_box.currentText().split()[0]
+    def on_wo_commit_button_clicked(self):
+        selected_pool = self.combo_box_pool.currentText().split()[0]
         pool_id = selected_pool
 
         data_filepath = "dataset/wo_commit_comparison.csv"
@@ -197,8 +229,33 @@ class MesMate(QMainWindow):
             table_dialog.exec()
 
             # Call the plot function from plotter.py
-            plot_pool_chart(pool_id, pool_data)
+            plot_combo_chart(pool_data, pool_id, 'WO_END_YM', 'NUMERATOR_ACTUAL',
+                             'WO COMMIT')
 
+    def on_product_lt_vs_actual_button_clicked(self):
+        selected_prod_cat = self.combo_box_prod_cat.currentText().split()[0]
+        prod_cat = selected_prod_cat
+
+        sp_name = "usp_Ofbiz_PP_CompareEndWoProdIdAvgLtWithProdLtByPastDays"
+        sp_name = sp_name + " " + self.lineEntryPastDays.text()
+        data_product_lt_vs_actual = execute_stored_procedure(self.config, sp_name)
+
+        # Convert the result to a pandas DataFrame if it is a list of dictionaries
+        if isinstance(data_product_lt_vs_actual, list):
+            data_product_lt_vs_actual = pd.DataFrame(data_product_lt_vs_actual)
+
+        # Check if pool_data is empty
+        if data_product_lt_vs_actual.empty:
+            QMessageBox.warning(self, 'Empty Data', 'No production orders for the selected pool.')
+        else:
+            # Show the data table
+            data_product_lt_vs_actual = filter_data(data_product_lt_vs_actual, PRODUCT_CATEGORY=prod_cat)
+            table_dialog = DataTableDialog(data_product_lt_vs_actual, self)
+            table_dialog.exec()
+
+            # Call the plot function from plotter.py
+            plot_combo_chart(data_product_lt_vs_actual, None, 'WO_END_YM', 'NUMERATOR_ACTUAL',
+                             'WO COMMIT')
 
 # Pay attention to the data type mismatching issue
 def get_pool_data_from_db(data_filepath, pool_id, start_date=None, end_date=None):
@@ -227,6 +284,25 @@ def get_pool_data_from_db(data_filepath, pool_id, start_date=None, end_date=None
         pool_data = pool_data[(pool_data['PROD_COMMITTED'] >= start_date) & (pool_data['PROD_COMMITTED'] <= end_date)]
 
     return pool_data
+
+# filtering data
+def filter_data(data, *args, **kwargs):
+    # print(f"Fixed argument (data): {data}")
+
+    # Count and print the positional arguments
+    # print(f"Number of positional arguments: {len(args)}")
+    for i, arg in enumerate(args):
+        print(f"Positional argument {i + 1}: {arg} (type: {type(arg)})")
+
+    # Count and print the keyword arguments
+    print(f"Number of keyword arguments: {len(kwargs)}")
+    for key, value in kwargs.items():
+        print(f"Keyword argument '{key}': {value} (type: {type(value)})")
+        if key == 'PRODUCT_CATEGORY':
+            data_returned = data[data['PRODUCT_CATEGORY'] == value]
+
+    return data_returned
+
 
 def main():
     app = QApplication(sys.argv)

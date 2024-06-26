@@ -2,5 +2,6 @@
     "server": "MESCHZHE01",
     "database": "ofbiz",
     "username": "pbilogin",
-    "password": "kmcj123456"
+    "password": "kmcj123456",
+    "main_screen_margin": 100
 }
