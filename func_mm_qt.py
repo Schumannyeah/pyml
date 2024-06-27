@@ -1,8 +1,8 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QScrollArea
 from PyQt5.QtCore import Qt
-from func_string import split_string
-from func_db import get_database_config, get_data_from_db_by_sqlString
+from func.func_string import split_string
+from func.func_db import get_database_config, get_data_from_db_by_sqlString
 
 
 class TextSimilarityCalculator(QWidget):

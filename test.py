@@ -4,21 +4,20 @@
 
 import sys
 from PyQt6.QtWidgets import QMainWindow
-from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDateTimeEdit,
-        QDial, QDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
-        QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
-        QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
-        QVBoxLayout, QWidget, QFrame, QTableWidgetItem, QMessageBox, QFileDialog)
+from PyQt6.QtWidgets import (QApplication, QComboBox, QDateTimeEdit,
+                             QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+                             QPushButton, QSizePolicy,
+                             QTabWidget, QVBoxLayout, QWidget, QMessageBox)
 from PyQt6.QtGui import QIcon, QAction, QGuiApplication
-from PyQt6.QtCore import QDate, Qt
+from PyQt6.QtCore import QDate
 from func_gui_mm_qt6 import ProductSimilarity
 from func_gui_mm_ism import ProductSimilarityMulti
 from func_gui_mm_ism_long_desc import ProductSimilarityMultiLongDesc
-from func_db import get_database_config, execute_stored_procedure, get_data_from_db_by_sqlString
+from func.func_db import get_database_config, execute_stored_procedure, get_data_from_db_by_sqlString
 
 import pandas as pd
 import json
-from chart_plotter.combo_chart_by_sql_fields import plot_combo_chart
+from chart_plotter.combo_chart_by_sql_fields import plot_combo_chart, plot_scatter_chart, plot_distribution_chart
 from data_table_builder.DataTableDialog import DataTableDialog
 from datetime import date
 from pandas.api.types import is_string_dtype
@@ -127,6 +126,8 @@ class MesMate(QMainWindow):
 
             if tab_name == "Production":
                 top_row_layout_production = QHBoxLayout()
+
+                # Function 1
                 top_row_layout_production.addWidget(QLabel("Function 1 --->   "))
                 top_row_layout_production.addWidget(QLabel("Pool"))
                 # Create QComboBox and populate it with data from stored procedure
@@ -161,15 +162,18 @@ class MesMate(QMainWindow):
                 top_row_layout_production.addStretch(1)
                 tab_layout_production.addLayout(top_row_layout_production)
 
-
-
-
-
-
-
-
+                # Function 2
                 sec_row_layout_production = QHBoxLayout()
                 sec_row_layout_production.addWidget(QLabel("Function 2 --->   "))
+
+                sec_row_layout_production.addWidget(QLabel("Function Category"))
+                # Create QComboBox and populate it with data from stored procedure
+                self.combo_box_func_lt_comp_cat = QComboBox()
+                self.combo_box_func_lt_comp_cat.addItem("Product LeadTime Delta By Week")
+                self.combo_box_func_lt_comp_cat.addItem("WO LeadTime Delta Distribution By Days")
+                self.combo_box_func_lt_comp_cat.addItem("WO LeadTime Delta Scatter By Days")
+                sec_row_layout_production.addWidget(self.combo_box_func_lt_comp_cat)
+
                 sec_row_layout_production.addWidget(QLabel("Product Category"))
                 # Create QComboBox and populate it with data from stored procedure
                 self.combo_box_prod_cat = QComboBox()
@@ -177,7 +181,7 @@ class MesMate(QMainWindow):
                 self.combo_box_prod_cat.addItem("AX_NA")
 
                 prod_cat_results = get_data_from_db_by_sqlString(self.config,
-                                                             "select PRODUCT_CATEGORY_ID from PRODUCT_CATEGORY where product_category_id like 'AX_%'")
+                                    "select PRODUCT_CATEGORY_ID from PRODUCT_CATEGORY where product_category_id like 'AX_%'")
                 for row in prod_cat_results:
                     self.combo_box_prod_cat.addItem(row.PRODUCT_CATEGORY_ID)  # Assuming the column name is 'pool_id'
 
@@ -236,7 +240,17 @@ class MesMate(QMainWindow):
         selected_prod_cat = self.combo_box_prod_cat.currentText().split()[0]
         prod_cat = selected_prod_cat
 
-        sp_name = "usp_Ofbiz_PP_CompareEndWoProdIdAvgLtWithProdLtByPastDays"
+        selected_func_lt_comp_cat = self.combo_box_func_lt_comp_cat.currentText()
+        func_lt_comp_cat = selected_func_lt_comp_cat
+
+        sp_name = ""
+        if func_lt_comp_cat == "Product LeadTime Delta By Week":
+            sp_name = "usp_Ofbiz_PP_ProductLTDeltaByWeek"
+        elif func_lt_comp_cat == "WO LeadTime Delta Distribution By Days":
+            sp_name = "usp_Ofbiz_PP_CompareEndWoLtWithProdLtByPastDays"
+        elif func_lt_comp_cat == "WO LeadTime Delta Scatter By Days":
+            sp_name = "usp_Ofbiz_PP_CompareEndWoLtWithProdLtByPastDays"
+
         sp_name = sp_name + " " + self.lineEntryPastDays.text()
         data_product_lt_vs_actual = execute_stored_procedure(self.config, sp_name)
 
@@ -248,14 +262,22 @@ class MesMate(QMainWindow):
         if data_product_lt_vs_actual.empty:
             QMessageBox.warning(self, 'Empty Data', 'No production orders for the selected pool.')
         else:
-            # Show the data table
             data_product_lt_vs_actual = filter_data(data_product_lt_vs_actual, PRODUCT_CATEGORY=prod_cat)
+            # Show the data table
             table_dialog = DataTableDialog(data_product_lt_vs_actual, self)
             table_dialog.exec()
 
             # Call the plot function from plotter.py
-            plot_combo_chart(data_product_lt_vs_actual, None, 'WO_END_YM', 'NUMERATOR_ACTUAL',
-                             'WO COMMIT')
+            if func_lt_comp_cat == "Product LeadTime Delta By Week":
+                plot_scatter_chart(data_product_lt_vs_actual, 'LT_IN_WEEK', 'LT_DEV_IN_WEEK'
+                                   'Deviation Lead Time In Week Scatter By Product LT In Week')
+            elif func_lt_comp_cat == "WO LeadTime Delta Distribution By Days":
+                plot_distribution_chart(data_product_lt_vs_actual, 'LT_DEV', 'WO_POOL_ID',
+                                        "Distribution of Lead Time Deviation By Pool")
+            elif func_lt_comp_cat == "WO LeadTime Delta Scatter By Days":
+                plot_scatter_chart(data_product_lt_vs_actual, 'WO_LT', 'LT_DEV',
+                                        "Deviation Lead Time Scatter In Days By WO Actual Run LT In Days")
+
 
 # Pay attention to the data type mismatching issue
 def get_pool_data_from_db(data_filepath, pool_id, start_date=None, end_date=None):
@@ -299,7 +321,10 @@ def filter_data(data, *args, **kwargs):
     for key, value in kwargs.items():
         print(f"Keyword argument '{key}': {value} (type: {type(value)})")
         if key == 'PRODUCT_CATEGORY':
-            data_returned = data[data['PRODUCT_CATEGORY'] == value]
+            if value == 'AX_All':
+                data_returned = data
+            else:
+                data_returned = data[data['PRODUCT_CATEGORY'] == value]
 
     return data_returned
 

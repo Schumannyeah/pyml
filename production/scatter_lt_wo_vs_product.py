@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from func_db import get_database_config, get_data_from_db_by_sqlString
+from func.func_db import get_database_config, get_data_from_db_by_sqlString
 
 # to read the data table from sql database
 # Call the function to query the database

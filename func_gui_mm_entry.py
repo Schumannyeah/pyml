@@ -4,20 +4,17 @@
 
 import sys
 from PyQt6.QtWidgets import QMainWindow
-from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDateTimeEdit,
-        QDial, QDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
-        QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
-        QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
-        QVBoxLayout, QWidget, QFrame, QTableWidgetItem, QMessageBox, QFileDialog)
+from PyQt6.QtWidgets import (QApplication, QComboBox, QDateTimeEdit,
+                             QGridLayout, QHBoxLayout, QLabel, QPushButton, QSizePolicy,
+                             QTabWidget, QVBoxLayout, QWidget, QMessageBox)
 from PyQt6.QtGui import QIcon, QAction, QGuiApplication
-from PyQt6.QtCore import QDate, Qt
+from PyQt6.QtCore import QDate
 from func_gui_mm_qt6 import ProductSimilarity
 from func_gui_mm_ism import ProductSimilarityMulti
 from func_gui_mm_ism_long_desc import ProductSimilarityMultiLongDesc
-from func_db import get_database_config, execute_stored_procedure, get_data_from_db_by_sqlString
+from func.func_db import get_database_config, get_data_from_db_by_sqlString
 
 import pandas as pd
-import matplotlib.pyplot as plt
 from chart_plotter.combo_chart_by_sql_fields import plot_pool_chart
 from data_table_builder.DataTableDialog import DataTableDialog
 from datetime import date

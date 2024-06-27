@@ -8,12 +8,12 @@
 import pandas as pd
 from PyQt6.QtCore import QDateTime, Qt, QTimer
 from PyQt6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDateTimeEdit,
-        QDial, QDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
-        QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
-        QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
-        QVBoxLayout, QWidget, QFrame, QTableWidgetItem, QMessageBox, QFileDialog)
-from func_db import get_database_config, get_data_from_db_by_sqlString
-from func_string import split_string
+                             QDial, QDialog, QGridLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
+                             QProgressBar, QPushButton, QRadioButton, QScrollBar, QSizePolicy,
+                             QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
+                             QVBoxLayout, QWidget, QTableWidgetItem, QMessageBox, QFileDialog)
+from func.func_db import get_database_config, get_data_from_db_by_sqlString
+from func.func_string import split_string
 from PyQt6.QtGui import QGuiApplication
 
 

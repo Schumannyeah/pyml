@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 def plot_combo_chart(data, filter_by, group_by, group_value, title_name):
     # Group by WO_END_YM and calculate counts of NUMERATOR_ACTUAL
@@ -41,4 +42,16 @@ def plot_combo_chart(data, filter_by, group_by, group_value, title_name):
     ax_pool.set_xticks(range(len(data_grouped)))
     ax_pool.set_xticklabels(data_grouped.index, rotation=0)  # Rotates x-axis labels if necessary
 
+    plt.show()
+
+
+
+def plot_scatter_chart(data, x_field, y_field, chart_title):
+    sns.scatterplot(x=data[x_field], y=data[y_field])
+    plt.title(chart_title)
+    plt.show()
+
+def plot_distribution_chart(data, x_field, hue_field, chart_title):
+    sns.kdeplot(data=data, x=x_field, hue=hue_field, shade=True)
+    plt.title(chart_title)
     plt.show()
